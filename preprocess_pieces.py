@@ -2,11 +2,11 @@ import numpy as np
 import cv2
 import sys
 import os
-
+OUTPUT_PATH = 'outputs/'
 
 def get_output_filename():
     count = 0
-    while os.path.exists('output_%d.png' % count):
+    while os.path.exists(OUTPUT_PATH + 'output_%d.png' % count):
         count += 1
     return 'output_%d.png' % count
 
@@ -37,6 +37,8 @@ def read_chessboard(image, corner_array):
 def main():
     filename = sys.argv[1]
     img = cv2.imread(filename)
+    if not os.path.exists(OUTPUT_PATH):
+        os.mkdir(OUTPUT_PATH)
 
     found, corners = cv2.findChessboardCorners(img, (7,7))
     if found:
@@ -46,7 +48,7 @@ def main():
                 piece = chessboard[x][y]
                 edges = cv2.Canny(piece, 100, 200)
                 if edges.mean() > 0.01:
-                    cv2.imwrite(get_output_filename(), edges)
+                    cv2.imwrite(OUTPUT_PATH + get_output_filename(), edges)
 
 if __name__ == '__main__':
     main()
