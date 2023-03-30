@@ -1,8 +1,8 @@
 import os
 import numpy as np
 import cv2
-GT_PAWN_DIR = 'ground_truth/pawn/'
-GT_ROOK_DIR = 'ground_truth/rook/'
+
+GT_DIR = 'ground_truth'
 
 def zero_pad_image(img, shape):
     if img.shape == shape:
@@ -38,8 +38,11 @@ def get_avg_shape(ground_truths_path: str):
     return imgs_sum/len(gt_images)
 
 def main():
-    ans = get_avg_shape(GT_PAWN_DIR)
-    cv2.imwrite(GT_PAWN_DIR + 'avg.png', ans)
+    directories = os.listdir(GT_DIR)
+    for piece in directories:
+        piece_dir = f'{GT_DIR}/{piece}/'
+        ans = get_avg_shape(piece_dir)
+        cv2.imwrite(f'{piece_dir}avg.png', ans)
 
 if __name__ == '__main__':
     main()
