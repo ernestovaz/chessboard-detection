@@ -14,6 +14,9 @@ def get_output_filename(directory):
         count += 1
     return f'{directory}/gt{count}.png'
 
+def get_edges(image):
+    return cv2.Canny(image, 0, 255)
+
 
 # Creates ground truth image files
 # We can later create directories for different themes too
@@ -26,7 +29,7 @@ def save_images(board, theme_name):
 
         for position in position_list:
             image = board[position]
-            edge_map = cv2.Canny(image, 0, 255)
+            edge_map = get_edges(image)
             filename = get_output_filename(directory)
             cv2.imwrite(filename, edge_map)
 
@@ -35,7 +38,7 @@ def zero_pad_image(img, shape):
     if img.shape == shape:
         return img
 
-    padded_img = np.full(shape, (0,0,0), dtype=np.uint8)
+    padded_img = np.full(shape, 0, dtype=np.uint8)
 
     x_center = (shape[1] - img.shape[1]) // 2
     y_center = (shape[0] - img.shape[0]) // 2
