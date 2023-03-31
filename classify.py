@@ -3,10 +3,11 @@ import cv2
 import math
 
 from preprocess import zero_pad_image
+import chessboard
 
 GT_DIR = 'ground_truth/chess_com_default'
 MAX = 10000000
-INPUT_IMAGE = 'ground_truth/chess_com_default/pawn/gt2.png'
+INPUT_IMAGE = 'ground_truth/chess_com_default/king/gt1.png'
 
 def sum_squared_diff(img1, img2):
     sum = 0
@@ -25,10 +26,9 @@ def calc_dist(img1, img2):
 def classify(img):
     min_dist = MAX
     label = "pawn"
-    directories = os.listdir(GT_DIR)
-    for piece in directories:
+    for piece in chessboard.POSITIONS:
         avg_img_pth = f'{GT_DIR}/{piece}/avg.png'
-        if os.path.exists(avg_img_pth) and piece != '.DS_Store':
+        if os.path.exists(avg_img_pth):
             avg_img = cv2.imread(avg_img_pth)
             print(avg_img_pth, avg_img.shape)
             dist = calc_dist(img, avg_img)
