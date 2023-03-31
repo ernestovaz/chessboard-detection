@@ -18,14 +18,14 @@ def get_output_filename(directory):
 # Creates ground truth image files
 # We can later create directories for different themes too
 #
-def save_images(chessboard, theme_name):
+def save_images(board, theme_name):
     for piece_name, position_list in chessboard.POSITIONS.items():
         directory = f'{GT_DIR}/{theme_name}/{piece_name}'
         if not os.path.exists(directory):
             os.makedirs(directory)
 
         for position in position_list:
-            image = chessboard[position]
+            image = board[position]
             edge_map = cv2.Canny(image, 0, 255)
             filename = get_output_filename(directory)
             cv2.imwrite(filename, edge_map)
