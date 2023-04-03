@@ -9,11 +9,11 @@ import chessboard
 GT_DIR = 'ground_truth'
 IMG_SIZE = 32
 
-def get_output_filename(directory):
+def get_output_filename(directory, theme_name):
     count = 0
-    while os.path.exists(f'{directory}/gt{count}.png'):
+    while os.path.exists(f'{directory}/{theme_name}{count}.png'):
         count += 1
-    return f'{directory}/gt{count}.png'
+    return f'{directory}/{theme_name}{count}.png'
 
 def get_edges(image):
     return cv2.Canny(image, 0, 255)
@@ -24,14 +24,14 @@ def get_edges(image):
 #
 def save_images(board, theme_name):
     for piece_name, position_list in chessboard.POSITIONS.items():
-        directory = f'{GT_DIR}/{theme_name}/{piece_name}'
+        directory = f'{GT_DIR}/{piece_name}'
         if not os.path.exists(directory):
             os.makedirs(directory)
 
         for position in position_list:
             image = board[position]
             downscaled = downscale_image(image)
-            filename = get_output_filename(directory)
+            filename = get_output_filename(directory, theme_name)
             cv2.imwrite(filename, downscaled)
 
 
