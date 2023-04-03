@@ -18,8 +18,14 @@ POSITIONS = {
 # accessed with indices 0 through 7, origin in bottom-left corner
 def read_chessboard(image, corner_array):
     chessboard = np.empty((8,8), dtype='object')
+
+    if corner_array[0][0][0] > corner_array[1][0][0]:
+        corner_array = corner_array[::-1]
+
     corners = np.array(corner_array).reshape(7, 7, 2)
     corners = np.swapaxes(corners, 0, 1)
+    # corners = np.flip(corners, 0)
+    # corners = np.flip(corners, 1)
 
     width, height, channels = image.shape
     for y in range(8):
@@ -41,13 +47,15 @@ def read_chessboard(image, corner_array):
 
 
 def from_image(image):
-    hsv_image = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
-    saturated = hsv_image[...,1]*5
-    saturated = cv2.cvtColor(saturated, cv2.COLOR_HSV2BGR)
-
-    found, corners = cv2.findChessboardCorners(saturated, (7,7))
+    found, corners = cv2.findChessboardCorners(image, (7,7))
     if not found:
-        print('A chessboard could not be found in the image')
+        print('SATURATING...', end=' ')
+        hsv_image = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
+        hsv_image[...,1] = 255
+        saturated = cv2.cvtColor(hsv_image, cv2.COLOR_HSV2BGR)
+        found, corners = cv2.findChessboardCorners(saturated, (7,7))
+    if not found:
+        print('ERROR!')
         return None
 
     chessboard = read_chessboard(image, corners)

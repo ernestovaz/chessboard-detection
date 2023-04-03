@@ -7,6 +7,7 @@ from pathlib import Path
 import chessboard
 
 GT_DIR = 'ground_truth'
+IMG_SIZE = 32
 
 def get_output_filename(directory):
     count = 0
@@ -29,9 +30,9 @@ def save_images(board, theme_name):
 
         for position in position_list:
             image = board[position]
-            edge_map = get_edges(image)
+            downscaled = downscale_image(image)
             filename = get_output_filename(directory)
-            cv2.imwrite(filename, edge_map)
+            cv2.imwrite(filename, downscaled)
 
 
 def zero_pad_image(img, shape):
@@ -46,6 +47,11 @@ def zero_pad_image(img, shape):
              x_center:x_center+img.shape[1]] = img
 
     return padded_img
+
+
+def downscale_image(img):
+    return cv2.resize(img, (IMG_SIZE, IMG_SIZE), cv2.INTER_LINEAR)
+
 
 def get_avg_shape(ground_truths_path: str):
     dim1 = 0
@@ -62,7 +68,7 @@ def get_avg_shape(ground_truths_path: str):
 
     for gt_image_name in gt_images:
         gt_image = cv2.imread(ground_truths_path + gt_image_name)
-        gt_image = zero_pad_image(gt_image, output_shape)
+        gt_image = downscale_image(gt_image)
         imgs_sum += gt_image
 
     return imgs_sum/len(gt_images)
@@ -76,13 +82,14 @@ def calculate_averages(theme_name):
 
 def main():
     filename = sys.argv[1]
+    print('File: ', filename, end=' ')
     img = cv2.imread(filename)
     theme_name = Path(filename).stem
 
     board = chessboard.from_image(img)
     if board is not None:
         save_images(board, theme_name)
-        calculate_averages(theme_name)
+        print('OK!')
 
 
 if __name__ == '__main__':
