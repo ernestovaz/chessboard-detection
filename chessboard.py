@@ -41,8 +41,13 @@ def read_chessboard(image, corner_array):
 
 
 def from_image(image):
-    found, corners = cv2.findChessboardCorners(image, (7,7))
+    hsv_image = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
+    saturated = hsv_image[...,1]*5
+    saturated = cv2.cvtColor(saturated, cv2.COLOR_HSV2BGR)
+
+    found, corners = cv2.findChessboardCorners(saturated, (7,7))
     if not found:
+        print('A chessboard could not be found in the image')
         return None
 
     chessboard = read_chessboard(image, corners)
