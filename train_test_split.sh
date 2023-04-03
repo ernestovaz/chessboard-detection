@@ -1,6 +1,6 @@
 i=0
 for file in data/*; do 
-  python preprocess.py $file
+  python3 preprocess.py $file
   ((i+=1))
   if (($i == 108))
   then
