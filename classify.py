@@ -4,7 +4,10 @@ import cv2
 import math
 import numpy as np
 
-from preprocess import zero_pad_image, get_edges
+from tensorflow import keras
+import logging
+
+from preprocess import zero_pad_image, get_edges, downscale_image
 import chessboard
 
 GT_DIR = 'ground_truth/green'
@@ -19,6 +22,10 @@ SYMBOLS = {
     'king':     'k'
 }
 
+PIECES = ['bishop', 'king', 'knight', 'pawn', 'queen', 'rook']
+
+logging.getLogger('tensorflow').disabled = True
+
 def sum_squared_diff(img1, img2):
     sum = 0
     for y in range(img1.shape[0]):
@@ -31,11 +38,9 @@ def calc_dist(img1, img2):
     img1 = zero_pad_image(img1, img2.shape)
     return sum_squared_diff(img1, img2)
 
-def classify(img):
+def pattern_match(img):
     min_dist = MAX
     label = "pawn"
-    #f9f9f9
-    #525457
     unique, colors = np.unique(
         img.reshape(-1, img.shape[-1]),
         axis=0,
@@ -64,29 +69,43 @@ def classify(img):
                 label = piece
     return label, color
 
+def is_square_empty(image):
+    return image.var() < 2000
+
 def main():
     filename = sys.argv[1]
     input_image = cv2.imread(filename)
     board = chessboard.from_image(input_image)
+    if board is None: return
+
+    model = keras.models.load_model('model.keras')
+    if model is None: return
+
+    output = ''
+
     for y in range(7, -1, -1):
         consecutive_empties = 0
+
         for x in range(8):
-            label, color = classify(board[x][y])
-            if label is None:
+            image = downscale_image(board[x][y])
+            if is_square_empty(image):
                 consecutive_empties += 1
             else:
                 if consecutive_empties != 0:
-                    print(consecutive_empties, end='')
+                    output += str(consecutive_empties)
                     consecutive_empties = 0
-                symbol = SYMBOLS[label]
-                if color == 'white':
-                    symbol = symbol.upper()
-                print(symbol, end='')
+                label = model.predict(np.array([image]))[0]
+                piece = PIECES[np.argmax(label)]
+                symbol = SYMBOLS[piece]
+                #if color == 'white':
+                #    symbol = symbol.upper()
+                output += symbol
         if consecutive_empties != 0:
-            print(consecutive_empties, end='')
+            output += str(consecutive_empties)
             consecutive_empties = 0
-        print('\\', end='')
-    print('')
+        if y > 0:
+            output += '\\'
+    print(output)
 
 if __name__ == '__main__':
     main()

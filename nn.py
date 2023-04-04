@@ -51,6 +51,7 @@ def main():
 
     model.compile(loss="categorical_crossentropy", optimizer="adam", metrics=["accuracy"])
     model.fit(train_ds, batch_size=batch_size, epochs=epochs, validation_data = validation_ds)
+    model.save('model.keras', overwrite=True)
 
 if __name__ == '__main__':
     main()
